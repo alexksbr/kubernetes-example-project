@@ -60,3 +60,23 @@ resource "kubernetes_deployment" "demo-service" {
     }
   }
 }
+
+resource "kubernetes_service" "demo" {
+  metadata {
+    name = "demo"
+  }
+
+  spec {
+    selector = {
+      App = kubernetes_deployment.demo-service.spec.0.template.0.metadata[0].labels.App
+    }
+
+    port {
+      node_port = 30201
+      port = 4000
+      target_port = 4000
+    }
+
+    type = "NodePort"
+  }
+}
