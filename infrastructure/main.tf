@@ -49,7 +49,7 @@ resource "helm_release" "metrics-server" {
 
   set {
     name = "extraArgs"
-    value = "{--kubelet-insecure-tls}"
+    value = "{--kubelet-insecure-tls,--metric-resolution=15s}"
   }
 
   set {
