@@ -2,6 +2,10 @@ terraform {
   required_providers {
     kubernetes = {
       source = "hashicorp/kubernetes"
+      version = "2.15.0"
+    }
+    helm = {
+      version = "2.7.1"
     }
   }
 }
@@ -28,6 +32,30 @@ provider "kubernetes" {
   client_certificate     = base64decode(var.client_certificate)
   client_key             = base64decode(var.client_key)
   cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
+}
+
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/config"
+  }
+}
+
+resource "helm_release" "metrics-server" {
+  name = "metrics-server"
+  namespace = "kube-system"
+  repository = "https://charts.bitnami.com/bitnami"
+  chart = "metrics-server"
+  version = "6.2.2"
+
+  set {
+    name = "extraArgs"
+    value = "{--kubelet-insecure-tls}"
+  }
+
+  set {
+    name = "apiService.create"
+    value = true
+  }
 }
 
 resource "kubernetes_deployment" "demo-service" {
@@ -72,8 +100,8 @@ resource "kubernetes_service" "demo" {
     }
 
     port {
-      node_port = 30201
-      port = 4000
+      node_port   = 30201
+      port        = 4000
       target_port = 4000
     }
 
