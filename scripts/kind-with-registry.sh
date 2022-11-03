@@ -27,6 +27,10 @@ nodes:
   - containerPort: 30202
     hostPort: 30202
     listenAddress: "0.0.0.0"
+- role: worker
+- role: worker
+- role: worker
+- role: worker
 EOF
 
 # connect the registry to the cluster network if not already connected
