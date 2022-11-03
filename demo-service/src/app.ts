@@ -12,5 +12,14 @@ app.listen(PORT, () => {
 });
 
 app.get("/key", (req, res) => {
-  res.send({ key: "value" });
+  const result = calculate(4);
+  res.send({ key: result });
 });
+
+function calculate(baseNumber) {
+  let result = 0;
+  for (let i = Math.pow(baseNumber, 7); i >= 0; i--) {
+    result += Math.atan(i) * Math.tan(i);
+  }
+  return result;
+}
