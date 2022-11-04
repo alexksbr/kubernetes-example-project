@@ -64,7 +64,7 @@ resource "kubernetes_deployment" "demo-service" {
   }
 
   spec {
-    replicas = 4
+    replicas = 1
 
     selector {
       match_labels = {
@@ -83,6 +83,12 @@ resource "kubernetes_deployment" "demo-service" {
         container {
           image = "localhost:5001/demo-service:latest"
           name  = "demo-service"
+
+          resources {
+            limits = {
+              cpu = "500m"
+            }
+          }
         }
       }
     }
@@ -106,5 +112,33 @@ resource "kubernetes_service" "demo" {
     }
 
     type = "NodePort"
+  }
+}
+
+resource "kubernetes_horizontal_pod_autoscaler" "demo-autoscaler" {
+  metadata {
+    name = "demo-autoscaler"
+  }
+
+  spec {
+    scale_target_ref {
+      api_version = "apps/v1"
+      kind = "Deployment"
+      name = "demo-service"
+    }
+
+    min_replicas = 1
+    max_replicas = 16
+
+    metric {
+      type = "Resource"
+      resource {
+        name = "cpu"
+        target {
+          type = "Utilization"
+          average_utilization = 50
+        }
+      }
+    }
   }
 }
