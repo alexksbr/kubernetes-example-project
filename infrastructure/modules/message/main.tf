@@ -36,6 +36,17 @@ resource "kubernetes_deployment" "message_service" {
               cpu = "500m"
             }
           }
+
+          env {
+            name = "MONGODB_PASSWORD"
+            value_from {
+              secret_key_ref {
+                name = "message-mongodb"
+                key = "mongodb-root-password"
+                optional = false
+              }
+            }
+          }
         }
       }
     }
