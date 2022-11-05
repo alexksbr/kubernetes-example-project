@@ -40,6 +40,10 @@ provider "helm" {
   }
 }
 
+module "messages" {
+  source = "./modules/message"
+}
+
 resource "helm_release" "metrics-server" {
   name = "metrics-server"
   namespace = "kube-system"
@@ -55,90 +59,5 @@ resource "helm_release" "metrics-server" {
   set {
     name = "apiService.create"
     value = true
-  }
-}
-
-resource "kubernetes_deployment" "demo-service" {
-  metadata {
-    name = "demo-service"
-  }
-
-  spec {
-    replicas = 1
-
-    selector {
-      match_labels = {
-        App = "DemoService"
-      }
-    }
-
-    template {
-      metadata {
-        labels = {
-          App = "DemoService"
-        }
-      }
-
-      spec {
-        container {
-          image = "localhost:5001/demo-service:latest"
-          name  = "demo-service"
-
-          resources {
-            limits = {
-              cpu = "500m"
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "demo" {
-  metadata {
-    name = "demo"
-  }
-
-  spec {
-    selector = {
-      App = kubernetes_deployment.demo-service.spec.0.template.0.metadata[0].labels.App
-    }
-
-    port {
-      node_port   = 30201
-      port        = 4000
-      target_port = 4000
-    }
-
-    type = "NodePort"
-  }
-}
-
-resource "kubernetes_horizontal_pod_autoscaler" "demo-autoscaler" {
-  metadata {
-    name = "demo-autoscaler"
-  }
-
-  spec {
-    scale_target_ref {
-      api_version = "apps/v1"
-      kind = "Deployment"
-      name = "demo-service"
-    }
-
-    min_replicas = 1
-    max_replicas = 16
-
-    metric {
-      type = "Resource"
-      resource {
-        name = "cpu"
-        target {
-          type = "Utilization"
-          average_utilization = 50
-        }
-      }
-    }
   }
 }
