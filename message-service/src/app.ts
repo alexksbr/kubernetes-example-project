@@ -1,6 +1,6 @@
 import express, { Application, Request, Response } from "express";
 import bodyParser from "body-parser";
-import { MongoClient } from "mongodb";
+import {MongoClient, ObjectID} from "mongodb";
 
 const app: Application = express();
 app.use(bodyParser.json());
@@ -32,6 +32,15 @@ app.post("/messages", async (req, res) => {
   const messageCollection = mongoClient.db("messages").collection("messages");
 
   await messageCollection.insertOne(req.body);
+
+  res.send();
+});
+
+app.delete("/messages/:messageId", async (req, res) => {
+  await mongoClient.connect();
+  const messageCollection = mongoClient.db("messages").collection("messages");
+
+  await messageCollection.deleteOne({ _id: new ObjectID(req.params.messageId) });
 
   res.send();
 });
